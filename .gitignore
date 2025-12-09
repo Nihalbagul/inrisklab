@@ -43,6 +43,14 @@ out/
 # Logs
 *.log
 
+# Large files and archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+README.zip
+
 # Cloud credentials
 *.json
 !package.json
