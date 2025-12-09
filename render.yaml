@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: weather-api
+    env: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVars:
+      - key: STORAGE_TYPE
+        value: s3
+      - key: AWS_REGION
+        value: us-east-1
+      - key: OPEN_METEO_BASE_URL
+        value: https://archive-api.open-meteo.com/v1/archive
+      # Add these in Render dashboard (don't commit secrets):
+      # - S3_BUCKET_NAME
+      # - AWS_ACCESS_KEY_ID
+      # - AWS_SECRET_ACCESS_KEY
+      # - CORS_ORIGINS
+
