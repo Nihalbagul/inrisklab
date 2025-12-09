@@ -40,13 +40,16 @@ export default function WeatherFileList({ refreshTrigger, onFileSelect }: Weathe
     setError(null)
     try {
       const response = await weatherAPI.listWeatherFiles(cancelTokenRef.current)
-      setFiles(response.files)
+      // Ensure files is always an array
+      setFiles(Array.isArray(response.files) ? response.files : [])
     } catch (err: any) {
       // Don't show error if request was cancelled
       if (axios.isCancel(err) || err instanceof CancelledRequestError) {
         return
       }
       setError(getErrorMessage(err))
+      // Set empty array on error to prevent iteration errors
+      setFiles([])
     } finally {
       setLoading(false)
       cancelTokenRef.current = null
@@ -59,6 +62,11 @@ export default function WeatherFileList({ refreshTrigger, onFileSelect }: Weathe
 
   // Sort files based on selected option
   const sortedFiles = useMemo(() => {
+    // Ensure files is always an array
+    if (!Array.isArray(files) || files.length === 0) {
+      return []
+    }
+    
     const filesCopy = [...files]
     switch (sortBy) {
       case 'newest':
@@ -107,8 +115,8 @@ export default function WeatherFileList({ refreshTrigger, onFileSelect }: Weathe
     onFileSelect(fileName)
   }
 
-  const totalSize = files.reduce((sum, f) => sum + f.size, 0)
-  const hasMoreFiles = sortedFiles.length > INITIAL_VISIBLE
+  const totalSize = Array.isArray(files) ? files.reduce((sum, f) => sum + (f?.size || 0), 0) : 0
+  const hasMoreFiles = Array.isArray(sortedFiles) && sortedFiles.length > INITIAL_VISIBLE
 
   return (
     <div className="space-y-4 flex flex-col">
@@ -166,8 +174,8 @@ export default function WeatherFileList({ refreshTrigger, onFileSelect }: Weathe
         </div>
       )}
 
-      {/* Sort Control */}
-      {files.length > 0 && (
+          {/* Sort Control */}
+          {Array.isArray(files) && files.length > 0 && (
         <div className="flex items-center justify-between gap-3 pb-2">
           <label className="text-xs font-semibold text-gray-600 flex items-center gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,8 +248,8 @@ export default function WeatherFileList({ refreshTrigger, onFileSelect }: Weathe
         </div>
       )}
 
-      {/* File List - Show exactly 3 files, then scrollable */}
-      {files.length > 0 && (
+          {/* File List - Show exactly 3 files, then scrollable */}
+          {Array.isArray(files) && files.length > 0 && (
         <div className="relative">
           {/* Fixed height to show exactly 3 files, then scrollable */}
           <div className="relative space-y-2 overflow-y-auto custom-scrollbar pr-2" style={{ maxHeight: '280px', minHeight: '280px' }}>
@@ -262,7 +270,7 @@ export default function WeatherFileList({ refreshTrigger, onFileSelect }: Weathe
                 </div>
               </div>
             )}
-            {sortedFiles.map((file, index) => (
+            {Array.isArray(sortedFiles) && sortedFiles.map((file, index) => (
               <div
                 key={file.name}
                 onClick={() => handleFileClick(file.name)}

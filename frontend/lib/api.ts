@@ -89,7 +89,10 @@ export const weatherAPI = {
       const response = await api.get<FileListResponse>('/list-weather-files', {
         cancelToken: cancelToken?.token,
       })
-      return response.data
+      // Ensure files is always an array
+      return {
+        files: Array.isArray(response.data?.files) ? response.data.files : []
+      }
     } catch (error) {
       if (axios.isCancel(error)) {
         throw new CancelledRequestError()
